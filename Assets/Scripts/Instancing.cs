@@ -16,6 +16,7 @@ public class Instancing : MonoBehaviour
     {
         public Vector3 BasePosition;
         public Vector3 Position;
+        public Vector3 Rotation;
         public Vector3 Albedo;
     }
 
@@ -88,6 +89,7 @@ public class Instancing : MonoBehaviour
     #region // Private Fields
 
     ComputeBuffer _CubeDataBuffer;
+    ComputeBuffer _PrevCubeDataBuffer;
 
     /// GPU Instancingの為の引数
     uint[] _GPUInstancingArgs = new uint[5] { 0, 0, 0, 0, 0 };
@@ -112,6 +114,7 @@ public class Instancing : MonoBehaviour
 
         // バッファ生成
         _CubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
+        _PrevCubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
         _GPUInstancingArgsBuffer = new ComputeBuffer(1, _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         var cubeDataArr = new CubeData[_instanceCount];
 
@@ -120,6 +123,7 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetInt("_Width", _instanceCountX);
         _ComputeShader.SetInt("_Height", _instanceCountY);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
+        _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
         
     }
@@ -137,6 +141,7 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetFloat("_StepY", _CubeMeshScale.y);
         _ComputeShader.SetFloat("_StepZ", _CubeMeshScale.z);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
+        _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
         _ComputeShader.SetTexture(kernelId, "_NoiseTex", _NoiseTexture);
         
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
@@ -156,6 +161,11 @@ public class Instancing : MonoBehaviour
         {
             this._CubeDataBuffer.Release();
             this._CubeDataBuffer = null;
+        }
+        if (this._PrevCubeDataBuffer != null)
+        {
+            this._PrevCubeDataBuffer.Release();
+            this._PrevCubeDataBuffer = null;
         }
         if (this._GPUInstancingArgsBuffer != null)
         {

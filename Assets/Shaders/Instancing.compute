@@ -6,16 +6,19 @@
 
 //#include "Noise.cginc"
 #include "noise/SimplexNoise2D.hlsl"
+#include "Common.cginc"
 
 
 struct CubeData
 {
 	float3 BasePosition;
 	float3 Position;
+	float3 Rotation;
 	float3 Albedo;
 };
 
 RWStructuredBuffer<CubeData> _CubeDataBuffer;
+RWStructuredBuffer<CubeData> _PrevCubeDataBuffer;
 Texture2D<float4> _NoiseTex;
 int _Width;
 int _Height;
@@ -24,7 +27,7 @@ float _StepY;
 float _StepZ;
 
 // 経過時間
-float _Time;
+//float _Time;
 
 // 位相差
 float _Phi;
@@ -51,10 +54,15 @@ void Init(uint3 id : SV_DispatchThreadID)
 
 	int x = index % _Width;
 	int z = index / _Height;
-
+	
 	_CubeDataBuffer[index].BasePosition = float3(x - _Width / 2 , 0, z - _Height / 2);
-	//_CubeDataBuffer[index].Position *= float3(_StepX, _StepY, _StepZ);
+	_CubeDataBuffer[index].BasePosition += float3(frac(Random(index)), 0, frac(Random(index+1)));
+	_CubeDataBuffer[index].Position = float3(0, 0, 0);
+	_CubeDataBuffer[index].Rotation = RandomVector(index);
 	_CubeDataBuffer[index].Albedo = float3(1, 1, 1);
+
+	//_PrevCubeDataBuffer[index].BasePosition = _CubeDataBuffer[index].BasePosition;
+	_PrevCubeDataBuffer[index].Rotation = _CubeDataBuffer[index].Rotation;
 }
 
 [numthreads(ThreadBlockSize, 1, 1)]
@@ -62,18 +70,29 @@ void Update(uint3 id : SV_DispatchThreadID)
 {
 	// インデックス取得
 	const unsigned int index = id.x;
-	float3 pos = _CubeDataBuffer[index].BasePosition;
+	float3 pos;
+	float3 rot = _CubeDataBuffer[index].Rotation;
+	float3 basePos = _CubeDataBuffer[index].BasePosition;
+	float3 prevPos = _PrevCubeDataBuffer[index].Position;
+	float3 prevRot = _PrevCubeDataBuffer[index].Rotation;
 
-	float4 noise = _NoiseTex[pos.xz + float2(_Width / 2, _Height / 2)];
+	float4 noise = _NoiseTex[basePos.xz + float2(_Width / 2, _Height / 2)];
 
-	pos *= float3(_StepX, _StepY, _StepZ);
+	pos = basePos * float3(_StepX, _StepY, _StepZ);
 
-	float y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time));
-	y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time));
+	float y = _Amplitude * (1 + sin(basePos.x / _Lambda + _Phi * _Time)) * Random(index);
+	y += _Amplitude * (1 + sin(basePos.z / _Lambda + _Phi * _Time)) * Random(index+1);
 	y *= noise * 10;
+
+	y = lerp(y, prevPos.y, 0.99);
+
+	rot += prevRot * 0.1;
+
 
 	float hue = (y + _Amplitude * 2) / (4 * _Amplitude);
 
+	_PrevCubeDataBuffer[index].Position = float3(pos.x, y, pos.z);
 	_CubeDataBuffer[index].Position = float3(pos.x, y, pos.z);
+	_CubeDataBuffer[index].Rotation = rot;
 	_CubeDataBuffer[index].Albedo = float3(hsv2rgb(float3(hue, 1, 1)));
 }
