@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[ExecuteInEditMode, RequireComponent(typeof(Renderer))]
+//[ExecuteInEditMode, RequireComponent(typeof(Renderer))]
 public class PostEffect : MonoBehaviour
 {
 

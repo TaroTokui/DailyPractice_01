@@ -39,6 +39,7 @@
 
 	struct CubeData
 	{
+		float3 BalsePosition;
 		float3 Position;
 		float3 Albedo;
 	};

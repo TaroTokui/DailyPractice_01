@@ -14,6 +14,7 @@ public class Instancing : MonoBehaviour
 
     struct CubeData
     {
+        public Vector3 BasePosition;
         public Vector3 Position;
         public Vector3 Albedo;
     }
@@ -132,8 +133,11 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetFloat("_Phi", _Phi);
         _ComputeShader.SetFloat("_Lambda", _Lambda);
         _ComputeShader.SetFloat("_Amplitude", _Amplitude);
+        _ComputeShader.SetFloat("_StepX", _CubeMeshScale.x);
+        _ComputeShader.SetFloat("_StepY", _CubeMeshScale.y);
+        _ComputeShader.SetFloat("_StepZ", _CubeMeshScale.z);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
-        _ComputeShader.SetTexture(kernelId, "_tex", _NoiseTexture);
+        _ComputeShader.SetTexture(kernelId, "_NoiseTex", _NoiseTexture);
         
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
 
