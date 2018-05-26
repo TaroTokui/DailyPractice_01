@@ -46,10 +46,8 @@ public class Instancing : MonoBehaviour
     Material _NoiseMaterial;
 
     // compute shaderに渡すtexture
-    //[SerializeField]
-    //Texture2D _tex;// = new Texture2D(_instanceCountX, _instanceCountY, TextureFormat.ARGB32, false);;
-    //[SerializeField]
-    //Mesh _NoiseMesh;
+    [SerializeField]
+    RenderTexture _NoiseTexture;
 
     /// 表示領域の中心座標
     [SerializeField]
@@ -142,7 +140,7 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetFloat("_Amplitude", _Amplitude);
         //_ComputeShader.SetInt("_Octaves", 10);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
-        _ComputeShader.SetTexture(kernelId, "_tex", _NoiseMaterial.GetTexture("_MainTex"));
+        _ComputeShader.SetTexture(kernelId, "_tex", _NoiseTexture);
         //_NoiseMaterial.GetTexture("_MainTex");
         
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
