@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f707b50e62362f64d9e56c1ad123a66e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - _ComputeShader: {fileID: 7200000, guid: f8a91ea504eaf5545b1b5a574a642ae5, type: 3}
+  - _CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  - _CubeMaterial: {fileID: 2100000, guid: 970ead50bda96d14baef0bb4e5e3942b, type: 2}
+  - _NoiseTexture: {fileID: 8400000, guid: c2ae957b0642b1c4cb37f633afa6cd62, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

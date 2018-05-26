@@ -5,7 +5,8 @@
 #define ThreadBlockSize 256
 
 //#include "Noise.cginc"
-#include "SimplexNoise2D.hlsl"
+#include "noise/SimplexNoise2D.hlsl"
+
 
 struct CubeData
 {
@@ -62,7 +63,7 @@ void Update(uint3 id : SV_DispatchThreadID)
 
 	float y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time));
 	y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time));
-	y *= t;
+	y *= t * 10;
 
 	float hue = (y + _Amplitude * 2) / (4 * _Amplitude);
 

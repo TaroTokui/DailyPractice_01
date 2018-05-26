@@ -42,8 +42,8 @@ public class Instancing : MonoBehaviour
     [SerializeField]
     Vector3 _CubeMeshScale = new Vector3(1f, 1f, 1f);
 
-    [SerializeField]
-    Material _NoiseMaterial;
+    //[SerializeField]
+    //Material _NoiseMaterial;
 
     // compute shaderに渡すtexture
     [SerializeField]
@@ -120,17 +120,11 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetInt("_Height", _instanceCountY);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
-
-        // texture初期化
-        //gameObject.GetComponent<Rigidbody>();
-        //_tex = new Texture2D(_instanceCountX, _instanceCountY, TextureFormat.ARGB32, false);
+        
     }
 
     void Update()
     {
-        noisePlane = GameObject.Find("Plane");
-        //m_texture.
-
         //_NoiseMaterial.GetTexture()
         // ComputeShader
         int kernelId = _ComputeShader.FindKernel("Update");
@@ -138,10 +132,8 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetFloat("_Phi", _Phi);
         _ComputeShader.SetFloat("_Lambda", _Lambda);
         _ComputeShader.SetFloat("_Amplitude", _Amplitude);
-        //_ComputeShader.SetInt("_Octaves", 10);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
         _ComputeShader.SetTexture(kernelId, "_tex", _NoiseTexture);
-        //_NoiseMaterial.GetTexture("_MainTex");
         
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
 

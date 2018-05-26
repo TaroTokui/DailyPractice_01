@@ -205,7 +205,6 @@ GameObject:
   - component: {fileID: 260668409}
   - component: {fileID: 260668408}
   - component: {fileID: 260668407}
-  - component: {fileID: 260668406}
   m_Layer: 0
   m_Name: TextureCamera
   m_TagString: Untagged
@@ -213,18 +212,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &260668406
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 260668405}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: adba1ca2a7ad3084cb1edb97c32ff007, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  noiseMaterial: {fileID: 2100000, guid: e0deb8c092be9ee45b4e7bb142ee6cbb, type: 2}
 --- !u!81 &260668407
 AudioListener:
   m_ObjectHideFlags: 0
@@ -502,13 +489,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f707b50e62362f64d9e56c1ad123a66e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _instanceCountX: 100
-  _instanceCountY: 100
+  _instanceCountX: 256
+  _instanceCountY: 256
   _ComputeShader: {fileID: 7200000, guid: f8a91ea504eaf5545b1b5a574a642ae5, type: 3}
   _CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   _CubeMaterial: {fileID: 2100000, guid: 970ead50bda96d14baef0bb4e5e3942b, type: 2}
   _CubeMeshScale: {x: 1, y: 1, z: 1}
-  _NoiseMaterial: {fileID: 2100000, guid: 9647150de3e0d1b4e90b219f6fd48b58, type: 2}
   _NoiseTexture: {fileID: 8400000, guid: c2ae957b0642b1c4cb37f633afa6cd62, type: 2}
   _BoundCenter: {x: 0, y: 0, z: 0}
   _BoundSize: {x: 300, y: 300, z: 300}
