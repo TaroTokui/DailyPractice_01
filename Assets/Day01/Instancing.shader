@@ -79,7 +79,8 @@
 
 	void surf(Input IN, inout SurfaceOutputStandard o)
 	{
-		o.Albedo = IN.color.rgb;
+		//o.Albedo = IN.color.rgb;
+		o.Albedo = _Color;
 		o.Metallic = _Metallic;
 		o.Smoothness = _Smoothness;
 		o.Normal = float3(0, 0, IN.vface < 0 ? -1 : 1);
