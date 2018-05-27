@@ -97,7 +97,7 @@
 		o.Albedo = _Color;
 		o.Metallic = _Metallic;
 		o.Smoothness = _Smoothness;
-		o.Emission = 0.1;
+		//o.Emission = 0.5;
 		o.Normal = float3(0, 0, IN.vface < 0 ? -1 : 1);
 	}
 

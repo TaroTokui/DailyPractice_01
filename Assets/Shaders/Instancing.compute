@@ -82,7 +82,7 @@ void Update(uint3 id : SV_DispatchThreadID)
 
 	float y = _Amplitude * (1 + sin(basePos.x / _Lambda + _Phi * _Time)) * Random(index);
 	y += _Amplitude * (1 + sin(basePos.z / _Lambda + _Phi * _Time)) * Random(index+1);
-	y *= noise * 10;
+	y *= noise * 10 * _StepY;
 
 	y = lerp(y, prevPos.y, 0.99);
 
