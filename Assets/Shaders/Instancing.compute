@@ -62,15 +62,15 @@ void Init(uint3 id : SV_DispatchThreadID)
 	int x = index % _Width;
 	int z = index / _Height;
 
+	_CubeDataBuffer[index].Velocity = float3(0, 0, 0);
+
 	_BaseCubeDataBuffer[index].Position = float3(x - _Width / 2, 0, z - _Height / 2);
-	//_CubeDataBuffer[index].BasePosition = float3(x - _Width / 2 , 0, z - _Height / 2);
 	//_CubeDataBuffer[index].BasePosition += float3(frac(Random(index)), 0, frac(Random(index+1)));
-	//_BaseCubeDataBuffer[index].Position = float3(0, 0, 0);
 	_BaseCubeDataBuffer[index].Rotation = RandomVector(index);
 	_BaseCubeDataBuffer[index].Albedo = float3(1, 1, 1);
 
-	//_PrevCubeDataBuffer[index].BasePosition = _CubeDataBuffer[index].BasePosition;
 	_PrevCubeDataBuffer[index].Rotation = _BaseCubeDataBuffer[index].Rotation;
+	_PrevCubeDataBuffer[index].Velocity = float3(0, 0, 0);
 }
 
 [numthreads(ThreadBlockSize, 1, 1)]
@@ -120,7 +120,39 @@ void UpdateGravity(uint3 id : SV_DispatchThreadID)
 {
 	// インデックス取得
 	const unsigned int index = id.x;
+	float3 prevPos = _CubeDataBuffer[index].Position;
+	float3 prevVel = _CubeDataBuffer[index].Velocity;
+	float3 prevRot = _CubeDataBuffer[index].Rotation;
+	float3 pos = prevPos;
+	float3 vel = prevVel;
+	float3 rot = prevRot;
 
-	_CubeDataBuffer[index].Position = _BaseCubeDataBuffer[index].Position;
-	_CubeDataBuffer[index].Rotation = float3(0, 0, 0);
+	float4 noise = _NoiseTex[pos.xz + float2(_Width / 2, _Height / 2)];
+
+	//pos = basePos * float3(_StepX, _StepY, _StepZ);
+
+	// update position
+	pos += vel;
+
+	// update velocity
+	//vel += float3(0, -_Gravity, 0);
+	vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
+
+	if (pos.y < 0)
+	{
+		vel.y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time)) * Random(index);
+		vel.y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time)) * Random(index + 1);
+		vel.y *= noise * 10 * _StepY;
+
+		//vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
+	}
+
+
+	pos.y = lerp(pos.y, prevPos.y + vel.y, 0.99);
+	//float hue = (y + _Amplitude * 2) / (4 * _Amplitude);
+
+	//_PrevCubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
+	_CubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
+	_CubeDataBuffer[index].Velocity = vel;
+	_CubeDataBuffer[index].Rotation = rot;
 }
