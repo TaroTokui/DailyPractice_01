@@ -14,11 +14,18 @@ public class Instancing : MonoBehaviour
 
     struct CubeData
     {
-        public Vector3 BasePosition;
+        //public Vector3 BasePosition;
         public Vector3 Position;
+        public Vector3 Velocity;
         public Vector3 Rotation;
         public Vector3 Albedo;
     }
+    //public enum LayoutType
+    //{
+    //    LayoutFlat,
+    //    LayoutCube,
+    //    LayoutFree
+    //}
 
     #endregion // Defines
 
@@ -33,6 +40,10 @@ public class Instancing : MonoBehaviour
 
     [SerializeField]
     ComputeShader _ComputeShader;
+
+    [SerializeField]
+    //LayoutType _LayoutType = LayoutType.LayoutFlat;
+    int _LayoutType = 0;
 
     // instancingするmesh
     [SerializeField]
@@ -73,6 +84,11 @@ public class Instancing : MonoBehaviour
     [SerializeField]
     float _Amplitude = 1;
 
+    /// 重力
+    [SerializeField]
+    [Range(0, 10)]
+    float _Gravity = 9.8f;
+
     /// アニメーションの速さ
     [SerializeField]
     [Range(0, 10)]
@@ -89,6 +105,7 @@ public class Instancing : MonoBehaviour
     #region // Private Fields
 
     ComputeBuffer _CubeDataBuffer;
+    ComputeBuffer _BaseCubeDataBuffer;
     ComputeBuffer _PrevCubeDataBuffer;
 
     /// GPU Instancingの為の引数
@@ -114,6 +131,7 @@ public class Instancing : MonoBehaviour
 
         // バッファ生成
         _CubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
+        _BaseCubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
         _PrevCubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
         _GPUInstancingArgsBuffer = new ComputeBuffer(1, _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
         var cubeDataArr = new CubeData[_instanceCount];
@@ -123,6 +141,7 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetInt("_Width", _instanceCountX);
         _ComputeShader.SetInt("_Height", _instanceCountY);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
+        _ComputeShader.SetBuffer(kernelId, "_BaseCubeDataBuffer", _BaseCubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
         
@@ -130,17 +149,32 @@ public class Instancing : MonoBehaviour
 
     void Update()
     {
+        int kernelId;
+        if (_LayoutType == 0)
+        {
+            kernelId = _ComputeShader.FindKernel("UpdateFlat");
+        }
+        else if (_LayoutType == 1)
+        {
+            kernelId = _ComputeShader.FindKernel("UpdateGravity");
+        }
+        else
+        {
+            kernelId = _ComputeShader.FindKernel("Update");
+        }
         //_NoiseMaterial.GetTexture()
         // ComputeShader
-        int kernelId = _ComputeShader.FindKernel("Update");
+        //int kernelId = _ComputeShader.FindKernel("Update");
         _ComputeShader.SetFloat("_Time", Time.time / 5.0f * _Speed);
         _ComputeShader.SetFloat("_Phi", _Phi);
         _ComputeShader.SetFloat("_Lambda", _Lambda);
         _ComputeShader.SetFloat("_Amplitude", _Amplitude);
+        _ComputeShader.SetFloat("_Gravity", _Gravity);
         _ComputeShader.SetFloat("_StepX", _CubeMeshScale.x);
         _ComputeShader.SetFloat("_StepY", _CubeMeshScale.y);
         _ComputeShader.SetFloat("_StepZ", _CubeMeshScale.z);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
+        _ComputeShader.SetBuffer(kernelId, "_BaseCubeDataBuffer", _BaseCubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
         _ComputeShader.SetTexture(kernelId, "_NoiseTex", _NoiseTexture);
         
@@ -161,6 +195,11 @@ public class Instancing : MonoBehaviour
         {
             this._CubeDataBuffer.Release();
             this._CubeDataBuffer = null;
+        }
+        if (this._BaseCubeDataBuffer != null)
+        {
+            this._BaseCubeDataBuffer.Release();
+            this._BaseCubeDataBuffer = null;
         }
         if (this._PrevCubeDataBuffer != null)
         {

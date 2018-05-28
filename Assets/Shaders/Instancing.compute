@@ -1,5 +1,7 @@
 ﻿#pragma kernel Init
 #pragma kernel Update
+#pragma kernel UpdateFlat
+#pragma kernel UpdateGravity
 
 // スレッドグループのスレッドサイズ
 #define ThreadBlockSize 256
@@ -11,13 +13,15 @@
 
 struct CubeData
 {
-	float3 BasePosition;
+	//float3 BasePosition;
 	float3 Position;
+	float3 Velocity;
 	float3 Rotation;
 	float3 Albedo;
 };
 
 RWStructuredBuffer<CubeData> _CubeDataBuffer;
+RWStructuredBuffer<CubeData> _BaseCubeDataBuffer;
 RWStructuredBuffer<CubeData> _PrevCubeDataBuffer;
 Texture2D<float4> _NoiseTex;
 int _Width;
@@ -38,6 +42,9 @@ float _Lambda;
 // 振幅
 float _Amplitude;
 
+// 重力
+float _Gravity;
+
 float3 hsv2rgb(float3 c)
 {
 	float4 K = float4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
@@ -54,15 +61,16 @@ void Init(uint3 id : SV_DispatchThreadID)
 
 	int x = index % _Width;
 	int z = index / _Height;
-	
-	_CubeDataBuffer[index].BasePosition = float3(x - _Width / 2 , 0, z - _Height / 2);
-	_CubeDataBuffer[index].BasePosition += float3(frac(Random(index)), 0, frac(Random(index+1)));
-	_CubeDataBuffer[index].Position = float3(0, 0, 0);
-	_CubeDataBuffer[index].Rotation = RandomVector(index);
-	_CubeDataBuffer[index].Albedo = float3(1, 1, 1);
+
+	_BaseCubeDataBuffer[index].Position = float3(x - _Width / 2, 0, z - _Height / 2);
+	//_CubeDataBuffer[index].BasePosition = float3(x - _Width / 2 , 0, z - _Height / 2);
+	//_CubeDataBuffer[index].BasePosition += float3(frac(Random(index)), 0, frac(Random(index+1)));
+	//_BaseCubeDataBuffer[index].Position = float3(0, 0, 0);
+	_BaseCubeDataBuffer[index].Rotation = RandomVector(index);
+	_BaseCubeDataBuffer[index].Albedo = float3(1, 1, 1);
 
 	//_PrevCubeDataBuffer[index].BasePosition = _CubeDataBuffer[index].BasePosition;
-	_PrevCubeDataBuffer[index].Rotation = _CubeDataBuffer[index].Rotation;
+	_PrevCubeDataBuffer[index].Rotation = _BaseCubeDataBuffer[index].Rotation;
 }
 
 [numthreads(ThreadBlockSize, 1, 1)]
@@ -72,7 +80,7 @@ void Update(uint3 id : SV_DispatchThreadID)
 	const unsigned int index = id.x;
 	float3 pos;
 	float3 rot = _CubeDataBuffer[index].Rotation;
-	float3 basePos = _CubeDataBuffer[index].BasePosition;
+	float3 basePos = _BaseCubeDataBuffer[index].Position;
 	float3 prevPos = _PrevCubeDataBuffer[index].Position;
 	float3 prevRot = _PrevCubeDataBuffer[index].Rotation;
 
@@ -95,4 +103,24 @@ void Update(uint3 id : SV_DispatchThreadID)
 	_CubeDataBuffer[index].Position = float3(pos.x, y, pos.z);
 	_CubeDataBuffer[index].Rotation = rot;
 	_CubeDataBuffer[index].Albedo = float3(hsv2rgb(float3(hue, 1, 1)));
+}
+
+[numthreads(ThreadBlockSize, 1, 1)]
+void UpdateFlat(uint3 id : SV_DispatchThreadID)
+{
+	// インデックス取得
+	const unsigned int index = id.x;
+
+	_CubeDataBuffer[index].Position = _BaseCubeDataBuffer[index].Position;
+	_CubeDataBuffer[index].Rotation = float3(0,0,0);
+}
+
+[numthreads(ThreadBlockSize, 1, 1)]
+void UpdateGravity(uint3 id : SV_DispatchThreadID)
+{
+	// インデックス取得
+	const unsigned int index = id.x;
+
+	_CubeDataBuffer[index].Position = _BaseCubeDataBuffer[index].Position;
+	_CubeDataBuffer[index].Rotation = float3(0, 0, 0);
 }
