@@ -38,7 +38,8 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 924376509}
-  m_IndirectSpecularColor: {r: 0.37311557, g: 0.38073877, b: 0.3587339, a: 1}
+  m_IndirectSpecularColor: {r: 0.004019917, g: 0.00021943348, b: 0.00000005323065,
+    a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -521,7 +522,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1908464453}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.343, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -557,6 +558,7 @@ MonoBehaviour:
   _instanceCountX: 256
   _instanceCountY: 256
   _ComputeShader: {fileID: 7200000, guid: f8a91ea504eaf5545b1b5a574a642ae5, type: 3}
+  _LayoutType: 0
   _CubeMesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   _CubeMaterial: {fileID: 2100000, guid: 970ead50bda96d14baef0bb4e5e3942b, type: 2}
   _CubeMeshScale: {x: 2, y: 2, z: 2}
@@ -566,7 +568,11 @@ MonoBehaviour:
   _Phi: 3.1415927
   _Lambda: 1
   _Amplitude: 1
+  _Gravity: 9.8
   _Speed: 1
+  _InputLow: 0
+  _InputMid: 0
+  _InputHigh: 0
 --- !u!4 &1987914036
 Transform:
   m_ObjectHideFlags: 0
