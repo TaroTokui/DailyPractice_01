@@ -27,6 +27,7 @@ public class Instancing : MonoBehaviour
     //    LayoutFree
     //}
 
+
     #endregion // Defines
 
     // ==============================
@@ -94,6 +95,19 @@ public class Instancing : MonoBehaviour
     [Range(0, 10)]
     float _Speed = 1;
 
+    /// 音声入力
+    [SerializeField]
+    [Range(0, 1)]
+    float _InputLow = 0.0f;
+    
+    [SerializeField]
+    [Range(0, 1)]
+    float _InputMid = 0.0f;
+
+    [SerializeField]
+    [Range(0, 1)]
+    float _InputHigh = 0.0f;
+
     ///// アニメーションの周期
     //[Range(0.01f, 100)]
     //[SerializeField]
@@ -134,7 +148,7 @@ public class Instancing : MonoBehaviour
         _BaseCubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
         _PrevCubeDataBuffer = new ComputeBuffer(_instanceCount, Marshal.SizeOf(typeof(CubeData)));
         _GPUInstancingArgsBuffer = new ComputeBuffer(1, _GPUInstancingArgs.Length * sizeof(uint), ComputeBufferType.IndirectArguments);
-        var cubeDataArr = new CubeData[_instanceCount];
+        //var cubeDataArr = new CubeData[_instanceCount];
 
         // 初期化
         int kernelId = _ComputeShader.FindKernel("Init");
@@ -166,6 +180,8 @@ public class Instancing : MonoBehaviour
         // ComputeShader
         //int kernelId = _ComputeShader.FindKernel("Update");
         _ComputeShader.SetFloat("_Time", Time.time / 5.0f * _Speed);
+        _ComputeShader.SetInt("_Width", _instanceCountX);
+        _ComputeShader.SetInt("_Height", _instanceCountY);
         _ComputeShader.SetFloat("_Phi", _Phi);
         _ComputeShader.SetFloat("_Lambda", _Lambda);
         _ComputeShader.SetFloat("_Amplitude", _Amplitude);
@@ -173,6 +189,9 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetFloat("_StepX", _CubeMeshScale.x);
         _ComputeShader.SetFloat("_StepY", _CubeMeshScale.y);
         _ComputeShader.SetFloat("_StepZ", _CubeMeshScale.z);
+        _ComputeShader.SetFloat("_InputLow", _InputLow);
+        _ComputeShader.SetFloat("_InputMid", _InputMid);
+        _ComputeShader.SetFloat("_InputHigh", _InputHigh);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_BaseCubeDataBuffer", _BaseCubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
