@@ -131,24 +131,30 @@ void UpdateGravity(uint3 id : SV_DispatchThreadID)
 
 	//pos = basePos * float3(_StepX, _StepY, _StepZ);
 
+	// update velocity
+	//vel += float3(0, -_Gravity*0.01, 0);
+	vel -= float3(0, 0.01, 0);
+
 	// update position
 	pos += vel;
 
-	// update velocity
 	//vel += float3(0, -_Gravity, 0);
-	vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
+	//vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
 
 	if (pos.y < 0)
 	{
-		vel.y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time)) * Random(index);
-		vel.y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time)) * Random(index + 1);
-		vel.y *= noise * 10 * _StepY;
+		pos.y = 0;
+		vel.y = -vel.y;
+		//vel = -vel;
+		//vel.y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time)) * Random(index);
+		//vel.y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time)) * Random(index + 1);
+		//vel.y *= noise * 10 * _StepY;
 
 		//vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
 	}
 
 
-	pos.y = lerp(pos.y, prevPos.y + vel.y, 0.99);
+	//pos.y = lerp(pos.y, prevPos.y + vel.y, 0.99);
 	//float hue = (y + _Amplitude * 2) / (4 * _Amplitude);
 
 	//_PrevCubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
