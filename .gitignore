@@ -6,6 +6,7 @@
 /Assets/AssetStoreTools*
 /MillionPoints_Data/
 Assets/PostProcessing/
+Assets/uOSC/
 
 # Visual Studio 2015 cache directory
 /.vs/
