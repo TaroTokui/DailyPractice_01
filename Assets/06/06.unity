@@ -444,6 +444,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 14317399}
-  RotationSpeed: 1
-  Distance: 10
-  Hight: 10
+  RotationSpeed: 10
+  Distance: 20
+  HeightAngle: 45
