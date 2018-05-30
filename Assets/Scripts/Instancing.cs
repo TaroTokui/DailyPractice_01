@@ -4,6 +4,12 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 
 //[ExecuteInEditMode, RequireComponent(typeof(Renderer))]
+
+using uOSC;
+
+//namespace uOSC
+//{
+//    [RequireComponent(typeof(uOscServer))]
 public class Instancing : MonoBehaviour
 {
 
@@ -95,18 +101,25 @@ public class Instancing : MonoBehaviour
     [Range(0, 10)]
     float _Speed = 1;
 
+
+    [SerializeField]
+    bool useOsc = true;
+
+    [SerializeField]
+    OscReceiver _OscReceiver;
+
     /// 音声入力
     [SerializeField]
-    [Range(0, 1)]
+    //[Range(0, 1)]
     float _InputLow = 0.0f;
-    
+
     [SerializeField]
-    [Range(0, 1)]
+    //[Range(0, 1)]
     float _InputMid = 0.0f;
 
     [SerializeField]
-    [Range(0, 1)]
-    float _InputHigh = 0.0f;
+    //[Range(0, 1)]
+    float _InputHi = 0.0f;
 
     ///// アニメーションの周期
     //[Range(0.01f, 100)]
@@ -158,11 +171,19 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetBuffer(kernelId, "_BaseCubeDataBuffer", _BaseCubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
-        
+
     }
 
     void Update()
     {
+        // grab osc params
+        if(useOsc)
+        {
+            _InputLow = _OscReceiver._InputLow;
+            _InputMid = _OscReceiver._InputMid;
+            _InputHi = _OscReceiver._InputHi;
+        }
+
         int kernelId;
         if (_LayoutType == 0)
         {
@@ -191,12 +212,12 @@ public class Instancing : MonoBehaviour
         _ComputeShader.SetFloat("_StepZ", _CubeMeshScale.z);
         _ComputeShader.SetFloat("_InputLow", _InputLow);
         _ComputeShader.SetFloat("_InputMid", _InputMid);
-        _ComputeShader.SetFloat("_InputHigh", _InputHigh);
+        _ComputeShader.SetFloat("_InputHi", _InputHi);
         _ComputeShader.SetBuffer(kernelId, "_CubeDataBuffer", _CubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_BaseCubeDataBuffer", _BaseCubeDataBuffer);
         _ComputeShader.SetBuffer(kernelId, "_PrevCubeDataBuffer", _PrevCubeDataBuffer);
         _ComputeShader.SetTexture(kernelId, "_NoiseTex", _NoiseTexture);
-        
+
         _ComputeShader.Dispatch(kernelId, (Mathf.CeilToInt(_instanceCount / ThreadBlockSize) + 1), 1, 1);
 
         // GPU Instaicing
@@ -232,5 +253,30 @@ public class Instancing : MonoBehaviour
         }
     }
 
+    //void OnDataReceived(Message message)
+    //{
+    //    // address
+    //    var msg = message.address;
+    //    Debug.Log(msg);
+    //    switch (msg)
+    //    {
+    //        case "/Low":
+    //            //Debug.Log("low");
+    //            _InputLow = (float)message.values[0];
+    //            break;
+    //        case "/Mid":
+    //            //Debug.Log("mid");
+    //            _InputMid = (float)message.values[0];
+    //            break;
+    //        case "/Hi":
+    //            _InputHi = (float)message.values[0];
+    //            break;
+    //        default:
+    //            //Debug.Log("Incorrect intelligence level.");
+    //            break;
+    //    }
+
+    //}
     #endregion // MonoBehaviour Method
 }
+//}

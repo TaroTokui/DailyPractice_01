@@ -48,7 +48,7 @@ float _Gravity;
 // inputs
 float _InputLow;
 float _InputMid;
-float _InputHigh;
+float _InputHi;
 
 float3 hsv2rgb(float3 c)
 {
