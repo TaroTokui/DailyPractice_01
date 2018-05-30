@@ -172,5 +172,6 @@ void UpdateSimpleNoise(uint3 id : SV_DispatchThreadID)
 
 	//_PrevCubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
 	_CubeDataBuffer[index].Position = pos;// float3(basePos.x, noise.x * 20 * _Amplitude, basePos.z);
+	//_CubeDataBuffer[index].Rotation = float3(noise.x * 10, noise.x * 20, noise.x * 30);
 	_CubeDataBuffer[index].Rotation = float3(0,0,0);
 }
