@@ -2,6 +2,7 @@
 #pragma kernel Update
 #pragma kernel UpdateFlat
 #pragma kernel UpdateGravity
+#pragma kernel UpdateSimpleNoise
 
 // スレッドグループのスレッドサイズ
 #define ThreadBlockSize 256
@@ -126,11 +127,8 @@ void UpdateGravity(uint3 id : SV_DispatchThreadID)
 	// インデックス取得
 	const unsigned int index = id.x;
 	float3 basePos = _BaseCubeDataBuffer[index].Position;
-	//float3 pos;
 	float4 noise = _NoiseTex[basePos.xz + float2(_Width / 2, _Height / 2)];
-	//float4 noise = _NoiseTex[basePos.xz + float2(100,100)];
 
-#if 1
 	float3 prevPos = _CubeDataBuffer[index].Position;
 	float3 prevVel = _CubeDataBuffer[index].Velocity;
 	float3 prevRot = _CubeDataBuffer[index].Rotation;
@@ -138,44 +136,41 @@ void UpdateGravity(uint3 id : SV_DispatchThreadID)
 	float3 vel = prevVel;
 	float3 rot = prevRot;
 
-
-	//pos = basePos * float3(_StepX, _StepY, _StepZ);
-
 	// update velocity
 	vel += float3(0, -_Gravity*0.1, 0);
-	//vel -= float3(0, 0.01, 0);
 
 	// update position
 	pos += vel;
 
-	//vel += float3(0, -_Gravity, 0);
-	//vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
-
 	if (pos.y < 0)
 	{
 		pos.y = 0;
-		vel.y = 0;// -vel.y;
-		//vel = -vel;
-		//vel.y = _Amplitude * (1 + sin(pos.x / _Lambda + _Phi * _Time)) * Random(index);
-		//vel.y += _Amplitude * (1 + sin(pos.z / _Lambda + _Phi * _Time)) * Random(index + 1);
-		//vel.y *= noise * 10 * _StepY;
-
-		//vel.y = lerp(vel.y, vel.y - _Gravity, 0.99);
+		vel.y = 0;
 	}
 
 	if (_InputLow < noise.x && pos.y == 0)
 	{
 		vel.y = 3;
 	}
-#endif
-	//pos = basePos;
-	//pos.y = noise.x * 100;
 
-	//pos.y = lerp(pos.y, prevPos.y + vel.y, 0.99);
-	//float hue = (y + _Amplitude * 2) / (4 * _Amplitude);
-
-	//_PrevCubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
 	_CubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
 	_CubeDataBuffer[index].Velocity = vel;
 	_CubeDataBuffer[index].Rotation = rot;
+}
+
+
+[numthreads(ThreadBlockSize, 1, 1)]
+void UpdateSimpleNoise(uint3 id : SV_DispatchThreadID)
+{
+	// インデックス取得
+	const unsigned int index = id.x;
+	float3 basePos = _BaseCubeDataBuffer[index].Position;
+	float4 noise = _NoiseTex[basePos.xz + float2(_Width / 2, _Height / 2)];
+	float3 prevPos = _CubeDataBuffer[index].Position;
+
+	float3 pos = lerp(float3(basePos.x, noise.x * 20 * _Amplitude, basePos.z), prevPos, 0.9);
+
+	//_PrevCubeDataBuffer[index].Position = pos;// float3(pos.x, y, pos.z);
+	_CubeDataBuffer[index].Position = pos;// float3(basePos.x, noise.x * 20 * _Amplitude, basePos.z);
+	_CubeDataBuffer[index].Rotation = float3(0,0,0);
 }

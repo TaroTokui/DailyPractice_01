@@ -26,12 +26,13 @@ public class Instancing : MonoBehaviour
         public Vector3 Rotation;
         public Vector3 Albedo;
     }
-    //public enum LayoutType
-    //{
-    //    LayoutFlat,
-    //    LayoutCube,
-    //    LayoutFree
-    //}
+    public enum LayoutType
+    {
+        LayoutFlat,
+        LayoutGravity,
+        LayoutSimpleNoise,
+        LayoutFree
+    }
 
 
     #endregion // Defines
@@ -49,8 +50,12 @@ public class Instancing : MonoBehaviour
     ComputeShader _ComputeShader;
 
     [SerializeField]
+    LayoutType _LayoutTypeEnum = LayoutType.LayoutFlat;
+
+    [SerializeField]
     //LayoutType _LayoutType = LayoutType.LayoutFlat;
     int _LayoutType = 0;
+    int _PrevLayoutType = 0;
 
     // instancingするmesh
     [SerializeField]
@@ -177,25 +182,30 @@ public class Instancing : MonoBehaviour
     void Update()
     {
         // grab osc params
-        if(useOsc)
+        if (useOsc)
         {
             _InputLow = _OscReceiver._InputLow;
             _InputMid = _OscReceiver._InputMid;
             _InputHi = _OscReceiver._InputHi;
         }
 
+        updateLayoutType();
+
         int kernelId;
-        if (_LayoutType == 0)
+        switch(_LayoutTypeEnum)
         {
-            kernelId = _ComputeShader.FindKernel("UpdateFlat");
-        }
-        else if (_LayoutType == 1)
-        {
-            kernelId = _ComputeShader.FindKernel("UpdateGravity");
-        }
-        else
-        {
-            kernelId = _ComputeShader.FindKernel("Update");
+            case LayoutType.LayoutFlat:
+                kernelId = _ComputeShader.FindKernel("UpdateFlat");
+                break;
+            case LayoutType.LayoutGravity:
+                kernelId = _ComputeShader.FindKernel("UpdateGravity");
+                break;
+            case LayoutType.LayoutSimpleNoise:
+                kernelId = _ComputeShader.FindKernel("UpdateSimpleNoise");
+                break;
+            default:
+                kernelId = _ComputeShader.FindKernel("Update");
+                break;
         }
         //_NoiseMaterial.GetTexture()
         // ComputeShader
@@ -253,30 +263,20 @@ public class Instancing : MonoBehaviour
         }
     }
 
-    //void OnDataReceived(Message message)
-    //{
-    //    // address
-    //    var msg = message.address;
-    //    Debug.Log(msg);
-    //    switch (msg)
-    //    {
-    //        case "/Low":
-    //            //Debug.Log("low");
-    //            _InputLow = (float)message.values[0];
-    //            break;
-    //        case "/Mid":
-    //            //Debug.Log("mid");
-    //            _InputMid = (float)message.values[0];
-    //            break;
-    //        case "/Hi":
-    //            _InputHi = (float)message.values[0];
-    //            break;
-    //        default:
-    //            //Debug.Log("Incorrect intelligence level.");
-    //            break;
-    //    }
+    void updateLayoutType()
+    {
+        if(_PrevLayoutType != _LayoutType)
+        {
+            _LayoutTypeEnum = (LayoutType)_LayoutType;
+        }
+        else
+        {
+            _LayoutType = (int)_LayoutTypeEnum;
+        }
 
-    //}
+        _PrevLayoutType = _LayoutType;
+    }
+    
     #endregion // MonoBehaviour Method
 }
 //}
